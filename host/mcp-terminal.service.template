@@ -1,0 +1,14 @@
+[Unit]
+Description=Host Terminal MCP Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{PROJECT_DIR}}/host
+EnvironmentFile={{PROJECT_DIR}}/.env
+ExecStart=/usr/bin/env zsh {{PROJECT_DIR}}/host/server-terminal-mcp.sh
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

@@ -20,10 +20,7 @@ services:
     image: ngrok/ngrok:latest
     environment:
       NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
-      NGROK_URL: "${NGROK_URL:-}"
-    command: >-
-      http caddy:9876 --log stdout
-      ${NGROK_URL:+--domain=${NGROK_URL#https://}}
+    command: http caddy:9876 --url=${NGROK_DOMAIN} --log stdout
     ports:
       - "4040:4040"   # ngrok dashboard → http://localhost:4040
     depends_on:
@@ -43,20 +40,4 @@ services:
       - /home/oxcodexo/projects/obsidian/kb:/kb
     expose:
       - "9001"
-    restart: unless-stopped
-
-
-  # ── Terminal MCP (host network — real laptop shell access) ──
-  # NOTE: This service uses host networking so it can run commands
-  # on your actual laptop. It is NOT on the Docker bridge network.
-  # Caddy proxies to it via 127.0.0.1:9002 (host loopback).
-  mcp-terminal:
-    image: ghcr.io/supercorp-ai/supergateway:latest
-    network_mode: "host"
-    command: >
-      --stdio "npx @GongRzhe/terminal-controller-mcp"
-      --outputTransport streamableHttp
-      --streamableHttpPath /mcp
-      --port 9002
-      --bearerToken "${MCP_BEARER_TOKEN}"
     restart: unless-stopped

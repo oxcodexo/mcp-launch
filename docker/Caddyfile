@@ -9,7 +9,7 @@
 
     # ── Terminal MCP ─────────────────────────────────
     # Endpoint: /terminal/mcp
-    # Proxies to host loopback because mcp-terminal uses network_mode: host
+    # Proxies to host loopback (mcp-terminal runs natively on the host)
     route /terminal/* {
         uri strip_prefix /terminal
         reverse_proxy host.docker.internal:9002
