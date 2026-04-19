@@ -1,0 +1,18 @@
+:9876 {
+
+    # ── Filesystem MCP ─────────────────────────────────
+    # Endpoint: /filesystem/mcp
+    route /filesystem/* {
+        uri strip_prefix /filesystem
+        reverse_proxy mcp-filesystem:9001
+    }
+
+    # ── Terminal MCP ─────────────────────────────────
+    # Endpoint: /terminal/mcp
+    # Proxies to host loopback because mcp-terminal uses network_mode: host
+    route /terminal/* {
+        uri strip_prefix /terminal
+        reverse_proxy host.docker.internal:9002
+    }
+
+}

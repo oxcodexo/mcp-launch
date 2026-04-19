@@ -1,0 +1,62 @@
+name: "mcp-stack"
+
+services:
+
+  # ── Caddy reverse proxy ─────────────────────────────────────
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "9876:9876"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - mcp-filesystem
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ── ngrok tunnel ────────────────────────────────────────────
+  ngrok:
+    image: ngrok/ngrok:latest
+    environment:
+      NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
+      NGROK_URL: "${NGROK_URL:-}"
+    command: >-
+      http caddy:9876 --log stdout
+      ${NGROK_URL:+--domain=${NGROK_URL#https://}}
+    ports:
+      - "4040:4040"   # ngrok dashboard → http://localhost:4040
+    depends_on:
+      - caddy
+    restart: unless-stopped
+
+  # ── Filesystem MCP (bridge network) ────────────────────────
+  mcp-filesystem:
+    image: ghcr.io/supercorp-ai/supergateway:latest
+    command: >
+      --stdio "npx @modelcontextprotocol/server-filesystem /kb"
+      --outputTransport streamableHttp
+      --streamableHttpPath /mcp
+      --port 9001
+      --bearerToken "${MCP_BEARER_TOKEN}"
+    volumes:
+      - /home/oxcodexo/projects/obsidian/kb:/kb
+    expose:
+      - "9001"
+    restart: unless-stopped
+
+
+  # ── Terminal MCP (host network — real laptop shell access) ──
+  # NOTE: This service uses host networking so it can run commands
+  # on your actual laptop. It is NOT on the Docker bridge network.
+  # Caddy proxies to it via 127.0.0.1:9002 (host loopback).
+  mcp-terminal:
+    image: ghcr.io/supercorp-ai/supergateway:latest
+    network_mode: "host"
+    command: >
+      --stdio "npx @GongRzhe/terminal-controller-mcp"
+      --outputTransport streamableHttp
+      --streamableHttpPath /mcp
+      --port 9002
+      --bearerToken "${MCP_BEARER_TOKEN}"
+    restart: unless-stopped
