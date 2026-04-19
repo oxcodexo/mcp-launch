@@ -1,0 +1,10 @@
+:9876 {
+
+    # ── Agent Sandbox ─────────────────────────────────
+    # Endpoint: /sandbox/mcp
+    route /sandbox/* {
+        uri strip_prefix /sandbox
+        reverse_proxy mcp-sandbox:9002
+    }
+
+}

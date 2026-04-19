@@ -10,10 +10,8 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
-      - mcp-filesystem
+      - mcp-sandbox
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   # ── ngrok tunnel ────────────────────────────────────────────
   ngrok:
@@ -27,17 +25,22 @@ services:
       - caddy
     restart: unless-stopped
 
-  # ── Filesystem MCP (bridge network) ────────────────────────
-  mcp-filesystem:
-    image: ghcr.io/supercorp-ai/supergateway:latest
+  # ── Agent Sandbox ─────────────────────────────────────────
+  # A self-contained environment the agent can execute shell commands in.
+  # /workspace is mounted from the host path defined in SANDBOX_MOUNT_PATH.
+  # The agent has full shell access but is confined to this container.
+  mcp-sandbox:
+    build:
+      context: ./docker/sandbox
+      dockerfile: Dockerfile
     command: >
-      --stdio "npx @modelcontextprotocol/server-filesystem /kb"
+      --stdio "uvx terminal_controller"
       --outputTransport streamableHttp
       --streamableHttpPath /mcp
-      --port 9001
+      --port 9002
       --bearerToken "${MCP_BEARER_TOKEN}"
     volumes:
-      - /home/oxcodexo/projects/obsidian/kb:/kb
+      - ${SANDBOX_MOUNT_PATH}:/workspace
     expose:
-      - "9001"
+      - "9002"
     restart: unless-stopped
