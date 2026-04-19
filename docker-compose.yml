@@ -5,6 +5,7 @@ services:
   # ── Caddy reverse proxy ─────────────────────────────────────
   caddy:
     image: caddy:alpine
+    container_name: caddy
     ports:
       - "9876:9876"
     volumes:
@@ -16,6 +17,7 @@ services:
   # ── ngrok tunnel ────────────────────────────────────────────
   ngrok:
     image: ngrok/ngrok:latest
+    container_name: ngrok
     environment:
       NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
     command: http caddy:9876 --url=${NGROK_DOMAIN} --log stdout
@@ -33,6 +35,7 @@ services:
     build:
       context: ./docker/sandbox
       dockerfile: Dockerfile
+    container_name: mcp-sandbox
     command: >
       --stdio "uvx terminal_controller"
       --outputTransport streamableHttp
