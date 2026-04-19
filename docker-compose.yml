@@ -1,6 +1,8 @@
 name: "mcp-stack"
 
+
 services:
+
 
   # ── Caddy reverse proxy ─────────────────────────────────────
   caddy:
@@ -14,6 +16,7 @@ services:
       - mcp-sandbox
     restart: unless-stopped
 
+
   # ── ngrok tunnel ────────────────────────────────────────────
   ngrok:
     image: ngrok/ngrok:latest
@@ -26,6 +29,7 @@ services:
     depends_on:
       - caddy
     restart: unless-stopped
+
 
   # ── Agent Sandbox ─────────────────────────────────────────
   # A self-contained environment the agent can execute shell commands in.
@@ -46,4 +50,6 @@ services:
       - ${SANDBOX_MOUNT_PATH}:/workspace
     expose:
       - "9002"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
