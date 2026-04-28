@@ -4,7 +4,7 @@ name: "mcp-launch"
 services:
 
 
-  # ── Caddy reverse proxy ─────────────────────────────────────
+  # ── Caddy reverse proxy ────────────────────────────────────────────
   caddy:
     image: caddy:alpine
     container_name: caddy
@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
 
 
-  # ── ngrok tunnel ────────────────────────────────────────────
+  # ── ngrok tunnel ────────────────────────────────────────────────
   ngrok:
     image: ngrok/ngrok:latest
     container_name: ngrok
@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
 
 
-  # ── Agent Sandbox ─────────────────────────────────────────
+  # ── Agent Sandbox ───────────────────────────────────────────────
   # A self-contained environment the agent can execute shell commands in.
   # /workspace is mounted from the host path defined in SANDBOX_MOUNT_PATH.
   # The agent has full shell access but is confined to this container.
@@ -39,6 +39,9 @@ services:
     build:
       context: ./docker/sandbox
       dockerfile: Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
     container_name: sandbox-mcp
     command: >
       --stdio "uvx terminal_controller"

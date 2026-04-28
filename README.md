@@ -103,6 +103,7 @@ cp .env.example .env
 | `NGROK_AUTHTOKEN` | From https://dashboard.ngrok.com/get-started/your-authtoken |
 | `NGROK_DOMAIN` | Your static ngrok domain, e.g. `worthy-gorgeous-guppy.ngrok-free.app` |
 | `SANDBOX_MOUNT_PATH` | Host directory mounted into `/workspace` inside the sandbox container |
+| `UID` / `GID` | **Linux only.** Your host user's IDs — run `id -u` and `id -g` to get them. Passed as build args so files the sandbox creates in `/workspace` are owned by you, not root. Mac and Windows users can leave these unset. |
 
 ### 2. Build and start
 
