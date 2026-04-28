@@ -28,8 +28,8 @@ RUN apt-get update && apt-get install -y \
 RUN npm install -g supergateway
 
 # Create a non-root user matching the host UID/GID
-RUN groupadd -g ${GID} sandbox && \
-    useradd -m -u ${UID} -g ${GID} -s /bin/bash sandbox
+RUN groupadd --non-unique -g ${GID} sandbox && \
+    useradd --non-unique -m -u ${UID} -g ${GID} -s /bin/bash sandbox
 
 # Switch to the sandbox user for all remaining steps
 USER sandbox
