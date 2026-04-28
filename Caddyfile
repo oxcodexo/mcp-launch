@@ -4,7 +4,7 @@
     # Endpoint: /sandbox/mcp
     route /sandbox/* {
         uri strip_prefix /sandbox
-        reverse_proxy mcp-sandbox:9002
+        reverse_proxy sandbox-mcp:9002
     }
 
 }

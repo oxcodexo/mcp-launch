@@ -1,4 +1,4 @@
-# MCP Stack
+# MCP Launch
 
 A self-hosted, Docker-based stack for running MCP servers on your laptop and exposing them securely to any AI agent over the internet. New MCP servers plug in by adding a service and a single route — no changes to ngrok, Caddy, or any other part of the infrastructure.
 
@@ -8,8 +8,8 @@ A self-hosted, Docker-based stack for running MCP servers on your laptop and exp
 AI Agent
   └── https://<NGROK_DOMAIN>/<server>/mcp
         └── ngrok  →  caddy :9876
-                       ├── /sandbox/*  →  mcp-sandbox:9002
-                       ├── /my-tool/*  →  mcp-my-tool:9003
+                       ├── /sandbox/*  →  sandbox-mcp:9002
+                       ├── /my-tool/*  →  my-tool-mcp:9003
                        └── ...more as needed
 ```
 
@@ -18,7 +18,7 @@ Each MCP server runs as an isolated Docker container. Caddy sits in front and ro
 ## Project Structure
 
 ```
-mcp-stack/
+mcp-launch/
 ├── docker/
 │   └── sandbox/
 │       └── Dockerfile        ← custom image for the sandbox MCP
@@ -45,16 +45,20 @@ Currently included:
 
 | Service | Endpoint | Description |
 |---|---|---|
-| `mcp-sandbox` | `/sandbox/mcp` | A self-contained Linux environment the agent can freely operate in — run shell commands, read and write files, execute scripts, and use installed tools. Isolated from the host OS; only the mounted `/workspace` directory is accessible. |
+| `sandbox-mcp` | `/sandbox/mcp` | A self-contained Linux environment the agent can freely operate in — run shell commands, read and write files, execute scripts, and use installed tools. Isolated from the host OS; only the mounted `/workspace` directory is accessible. |
 
 ## Adding a New MCP Server
 
 The stack is designed to grow. To add any MCP server:
 
+> **Naming convention:** name your service `<name>-mcp` and use `/<name>/*` as its Caddy route prefix.
+> The shared root (`<name>`) ties the service name, the route, and the public URL together.
+> e.g. `my-tool-mcp` → `/my-tool/*` → `https://<NGROK_DOMAIN>/my-tool/mcp`
+
 **1. Add the service in `docker-compose.yml`:**
 
 ```yaml
-mcp-my-tool:
+my-tool-mcp:
   image: ghcr.io/supercorp-ai/supergateway:latest
   command: >
     --stdio "npx @some-scope/my-tool-mcp"
@@ -72,7 +76,7 @@ mcp-my-tool:
 ```caddy
 route /my-tool/* {
     uri strip_prefix /my-tool
-    reverse_proxy mcp-my-tool:9003
+    reverse_proxy my-tool-mcp:9003
 }
 ```
 
@@ -146,7 +150,7 @@ docker compose down
 docker compose logs -f
 
 # Restart a single service
-docker compose restart mcp-sandbox
+docker compose restart sandbox-mcp
 
 # Pull latest images and restart
 docker compose pull && docker compose up -d --build

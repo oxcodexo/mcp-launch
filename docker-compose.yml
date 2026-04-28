@@ -1,4 +1,4 @@
-name: "mcp-stack"
+name: "mcp-launch"
 
 
 services:
@@ -13,7 +13,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
-      - mcp-sandbox
+      - sandbox-mcp
     restart: unless-stopped
 
 
@@ -35,11 +35,11 @@ services:
   # A self-contained environment the agent can execute shell commands in.
   # /workspace is mounted from the host path defined in SANDBOX_MOUNT_PATH.
   # The agent has full shell access but is confined to this container.
-  mcp-sandbox:
+  sandbox-mcp:
     build:
       context: ./docker/sandbox
       dockerfile: Dockerfile
-    container_name: mcp-sandbox
+    container_name: sandbox-mcp
     command: >
       --stdio "uvx terminal_controller"
       --outputTransport streamableHttp
