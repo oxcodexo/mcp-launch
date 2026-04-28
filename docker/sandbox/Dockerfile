@@ -27,6 +27,10 @@ RUN apt-get update && apt-get install -y \
 # Install supergateway globally
 RUN npm install -g supergateway
 
+# Install uv/uvx from the official image into /usr/local/bin so it's
+# available to every user and every process without shell profile sourcing
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
 # Create a non-root user matching the host UID/GID
 RUN groupadd --non-unique -g ${GID} sandbox && \
     useradd --non-unique -m -u ${UID} -g ${GID} -s /bin/bash sandbox
@@ -35,11 +39,8 @@ RUN groupadd --non-unique -g ${GID} sandbox && \
 USER sandbox
 WORKDIR /home/sandbox
 
-# Install uv into the sandbox user's home so it's accessible at runtime
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/home/sandbox/.local/bin:$PATH"
-
 # Pre-warm uvx cache for terminal_controller so first run is instant
+# Cache lands in /home/sandbox/.cache/uv — correct for the sandbox user
 RUN uvx terminal_controller --help > /dev/null 2>&1 || true
 
 WORKDIR /workspace
