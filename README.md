@@ -210,3 +210,9 @@ docker compose pull && docker compose up -d --build
 - Mount only what the agent needs — do not mount your home directory or sensitive paths
 - Never commit `.env` to git
 - Keep your ngrok domain private to limit who can reach your endpoints
+
+## License
+
+MIT License — see [LICENSE](./LICENSE) for full details.
+
+Copyright (c) 2026 oxcodexo
